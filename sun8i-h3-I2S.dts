@@ -1,0 +1,59 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "allwinner,sun8i-h3";
+
+ 	fragment@0 { 
+ 		target-path = "/"; 
+ 		__overlay__ { 
+			ak4554: ak4554 {
+			#sound-dai-cells = <0>;
+			compatible = "asahi-kasei,ak4554";
+			ak4554,format = "i2s";
+			};
+ 		}; 
+ 	}; 
+
+	fragment@1 {
+		target = <&i2s0>;
+		__overlay__ {
+			status = "okay";
+			pinctrl-0 = <&i2s0_pins>;
+			sound-dai = <&ak4554>;
+			pinctrl-names = "default";
+		};
+	};
+
+	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+			sound_i2s {
+				compatible = "simple-audio-card";
+				simple-audio-card,name = "i2S";
+				simple-audio-card,mclk-fs = <256>;
+				simple-audio-card,format = "i2s";
+				simple-audio-card,widgets =
+					"Line", "Line In",
+					"Line", "Line Out";
+				simple-audio-card,routing =
+					"AINL", "Line In",
+					"AINR", "Line In",
+					"Line Out", "AOUTL",
+					"Line Out", "AOUTR";
+		                status = "okay";
+				simple-audio-card,bitclock-slave = <&dailink0_slave>;
+				simple-audio-card,frame-slave = <&dailink0_slave>;
+				simple-audio-card,cpu {
+					sound-dai = <&i2s0>;
+				};
+
+				dailink0_slave: simple-audio-card,codec {
+					sound-dai = <&ak4554>;
+				};
+			};
+		};
+	};
+};
+
+
